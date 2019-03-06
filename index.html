@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vue To Do list</title>
+    <link rel="icon" href="Vue.js_Logo.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app">
+        <div class="text-block">
+            <input type="text" class="addInput" @keydown.enter="addItem" placeholder="Write here what you need do!" v-model="curentItem">
+            <div class="add-button" @click="addItem">Add</div>
+        </div>
+
+        <div class="all-list">
+            <div class="list-item" v-for="item in list">
+                   <div class="item-inner-text" @dblclick="item.change = !item.change;item.done = false;" @click="item.done = !item.done;saveList()">
+                        <div class="text-span" v-if="!item.change" :class="{'red': item.important && !item.done,'done': item.done}">{{ item.text }}</div>
+                       <input class="changeInput" type="text" v-if="item.change" @keydown.enter="item.change = !item.change;item.done = false;saveList()" v-model="item.text">
+                    </div>
+                   <div class="item-buttons-block">
+                       <div class="item-button important-button" @click="item.important = !item.important;saveList()">!</div>
+                       <div class="item-button delete-button" @click="deleted(item.text,item.important,item.done)"><i class="far fa-trash-alt"></i></div>
+                   </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        let finalList = [];
+        if (localStorage.getItem("list") !== null) {
+            finalList = JSON.parse(localStorage.getItem("list"));
+        }
+        new Vue({
+            el: "#app",
+            data: {
+                curentItem: "",
+                list: finalList,
+            },
+            methods: {
+                addItem: function () {
+                    this.list.unshift({text: this.curentItem, important: false, done: false, change: false});
+                        this.curentItem = "";
+                        localStorage.setItem("list", JSON.stringify(this.list));
+                    },
+                deleted: function (str, importantFlag, doneFlag) {
+                    let actual = {text: str, important: importantFlag, done: doneFlag}
+                    for (let i = 0; i < this.list.length; i++) {
+                        if (actual.text === this.list[i].text && actual.important === this.list[i].important && actual.done === this.list[i].done) {
+                            this.list.splice(i, 1);
+                            break;
+                        }
+                    }
+                    localStorage.setItem("list", JSON.stringify(this.list));
+                },
+                saveList: function (){
+                    localStorage.setItem("list", JSON.stringify(this.list));
+                }
+            }
+        })
+    </script>
+</body>
+</html>
